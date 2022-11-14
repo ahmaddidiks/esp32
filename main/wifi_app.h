@@ -63,8 +63,4 @@ BaseType_t wifi_app_send_message(wifi_app_message_e msgID);
  */
 void wifi_app_start(void);
 
-
-
-
-
 #endif /* MAIN_WIFI_APP_H_ */
