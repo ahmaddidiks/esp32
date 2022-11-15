@@ -17,6 +17,7 @@
 #include "rgb_led.h"
 #include "task_common.h"
 #include "wifi_app.h"
+#include "http_server.h"
 
 // Tag used for ESP serial console message
 static const char TAG [] = "wifi_app";
@@ -113,7 +114,7 @@ static void wifi_app_default_wifi_init(void)
 }
 
 /**
- * Configurs the WiFI access point settings and assigns the static IP to the softAP.
+ * Configure the WiFI access point settings and assigns the static IP to the softAP.
  */
 static void wifi_app_soft_ap_config(void)
 {
@@ -182,7 +183,7 @@ static void wifi_app_task(void *pvParameters)
 				case WIFI_APP_MSG_START_HTTP_SERVER:
 					ESP_LOGI(TAG, "WIFI_APP_MSG_START_HTTP_SERVER");
 
-//					http_server_start();
+					http_server_start();
 					rgb_led_http_server_started();
 					break;
 
