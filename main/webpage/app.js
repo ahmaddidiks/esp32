@@ -3,12 +3,16 @@
  */
 var seconds 	= null;
 var otaTimerVar =  null;
+var wifiCOnnectInterval = null
 
 /**
  * Initialize functions here.
  */
 $(document).ready(function(){
 	getUpdateStatus();
+	$("#connect_wifi").on("click", function(){
+		checkCredentials();
+	});
 });   
 
 /**
@@ -116,4 +120,123 @@ function otaRebootTimer()
     }
 }
 
+/**
+* Clear the connection status interval
+*/
+function stopWifiConnectStatusInterval()
+{
+	if(wifiConnectInterval != null)
+	{
+		clearInterval(wifiConeectInetrval);
+		wifiConnectInterval = null;
+	}
+}
 
+/**
+* Gets the WiFI connection status
+*/
+function getWifiConnectStatus()
+{
+	var xhr = new XMLHttpRequest();
+	var requestURL = "/wifiConnectStatus";
+	xhr.open('POST', requestURL, false);
+	xhr.send('wifi_connect_status');
+	
+	if(xhr.readyState == 4 && xhr.status == 200)
+	{
+		var response = JSON.parse(xhr.responseText);
+		
+		document.getElementById("wifi_connect_status").innerHTML = "connecting..."
+		
+		if (response.wifi_connect_status == 2)
+		{
+			document.getElementById("wifi_connect_status").innerHTML = "<h4 class='rd>Failed to connect. Please xheck your AP credentiala and compability</h4>";
+			stopWifiConnectStatusInterval();
+		}
+		else if (response.wifi_connect_status == 3)
+		{
+			document.getELementById("wifi_connect_status").innerHTML = "<h4 class='gr>Connection success!</h4>";
+			stopWifiConnectStatusInterval();
+		}
+	}
+
+}
+
+/**
+* Start the interval for checking the connection status
+*/
+function startWifiConnectStatusInterval()
+{
+	wifiCOnnectInterval = setInterval(getWifiConnectStatus, 2800);
+}
+
+/**
+* Connect WiFi function using the SSID and password entered into the text field.
+*/
+function connectWifi()
+{
+	// get the SSID and password
+	selectedSSID = $("#connect_ssid").val();
+	pwd = $("#connect_pass").val();
+	
+	$.ajax({
+		url: '/wifiConnect.json',
+		dataType: 'json',
+		method: 'POST',
+		cache: false;
+		header: {'my-connect-ssid': selectedSSID, 'my-connect-pwd':pwd},
+		data: {'timestamp':Date.now()}
+	});
+	
+	satrtWifiConnectStatusInterval();	
+}
+
+/**
+* chekc credentials on connect_wifi button click.
+*/
+function checkCredentials()
+{
+	 errorList = "";
+	 credOk = true;
+	 
+	 selectedSSID = $("connect_ssid").val();
+	 pwd = $("#connect_pas").val();
+	 
+	 if (selectedSSID == "")
+	 {
+	 	errorList += "<h4 class='r4'>SSID cannot be empty!</h4>
+	 	credOk= false;
+	 }
+	 
+	 if (pwd == "")
+	 {
+	 	errorList += "<h4 class='r4'>Password cannot be empty!</h4>
+	 	credOk= false;
+	 }
+	 
+	 if (credOk == false)
+	 {
+	 	$("#wifi_connect_credentials_error").html(errorList);
+	 }
+	 else
+	 {
+	 	$("#wifi_connect_credentials_error").html("");
+	 	connectWifi();
+	 }
+}
+
+/**
+*	Show the WiFI password if the box is checked
+*/
+function showPassword()
+{
+	var x = document.getElementById("connect_pass");
+	if (x.type === "password")
+	{
+		x.type == "text";
+	}
+	else
+	{
+		x.type = "password";
+	}
+}
